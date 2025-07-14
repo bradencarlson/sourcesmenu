@@ -14,8 +14,21 @@ g:loaded_sourcesmenu = 1
 var config = {}
 
 def Run(): void
-        call ParseToml()
-        call ReadSources()
+        var parse_pass = ParseToml()
+
+        if parse_pass == -1
+                echo "Aborting."
+                g:loaded_sourcesmenu = 0
+                return
+        endif
+
+        var read_pass = ReadSources()
+
+        if read_pass < 0
+                echo "Aborting."
+                g:loaded_sourcesmenu = 0
+                return
+        endif
 
         set wcm=<C-Z>
         map <F4> :emenu Sources.<C-Z>
@@ -41,7 +54,13 @@ def ParseToml(): number
                 endif
         endfor
 
-        var config_file = readfile(expand(file_location))
+        var config_file: list<string>
+        try 
+                config_file = readfile(expand(file_location))
+        catch 
+                echo "Can't file config file: " .. file_location
+                return -1
+        endtry
 
         var key: string
         for line in config_file
@@ -49,6 +68,8 @@ def ParseToml(): number
                 # to the config dictionary. 
                 if match(line, '\s*\[\l\+\]\s*') != -1
                         key = substitute(line, '\s*\[\|\]\s*', "", "g")
+                        # TODO: perform a check here to ensure that the key
+                        # matches [a-z]+ before adding to config
                         config[key] = {}
                 else 
                         # make sure the line is not empty before continuing
@@ -60,6 +81,10 @@ def ParseToml(): number
                                 var sub_key = substitute(line, '\v\s*\=.*', '', "g")
                                 var value = substitute(line, '\v\s*\l*\s*\=\s*', '', "g")
                                 value = substitute(value, '"', '', "g")
+
+                                # TODO: perform a check here to ensure that both
+                                # sub_key and value match [a-z]+ before adding
+                                # to config
                                 config[key][sub_key] = value
                         endif
 
@@ -72,17 +97,18 @@ def ParseToml(): number
 
 enddef
 
-def ReadSources(): void
+def ReadSources(): number
         var filename = ""
         try 
                 filename = config['bibliography']['path']
         catch 
                 echo "Something went wrong getting the path"
+                return -1
         endtry
 
         if !filereadable(expand(filename))
                 echo "Something went wrong reading the sources file"
-                return 
+                return -2
         endif
 
         var source_file = readfile(expand(filename))
@@ -90,9 +116,13 @@ def ReadSources(): void
         for line in source_file
                 if match(line, '^@') != -1
                         var source = substitute(line, '\v\@\l*\{|,|\s*$', '', "g")
+                        # TODO: Perform a check here to ensure that source is
+                        # what we expect it to be. 
                         execute "menu Sources." .. source .. " :call Insertatcursor(\"" .. source .. "\")<CR>"
                 endif
         endfor
+
+        return 0
 enddef
 
 def g:Insertatcursor(needle: string): void
