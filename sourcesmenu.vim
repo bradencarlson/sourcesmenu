@@ -16,6 +16,9 @@ var config = {}
 def Run(): void
         call ParseToml()
         call ReadSources()
+
+        set wcm=<C-Z>
+        map <F4> :emenu Sources.<C-Z>
 enddef
 
 
@@ -86,8 +89,8 @@ def ReadSources(): void
 
         for line in source_file
                 if match(line, '^@') != -1
-                        var source = substitute(line, '\v\@\l*\{|,', '', "g")
-                        echo source
+                        var source = substitute(line, '\v\@\l*\{|,|\s*$', '', "g")
+                        execute "menu Sources." .. source .. " :echo \"" .. source .. "\""
                 endif
         endfor
 enddef
