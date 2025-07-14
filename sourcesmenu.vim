@@ -68,9 +68,12 @@ def ParseToml(): number
                 # to the config dictionary. 
                 if match(line, '\s*\[\l\+\]\s*') != -1
                         key = substitute(line, '\s*\[\|\]\s*', "", "g")
-                        # TODO: perform a check here to ensure that the key
-                        # matches [a-z]+ before adding to config
-                        config[key] = {}
+
+                        # Make sure the key is something that we expect. key
+                        # should match ^[a-z]+$
+                        if match(key, '\v^[a-z]+$') != -1
+                                config[key] = {}
+                        endif
                 else 
                         # make sure the line is not empty before continuing
                         if match(line, '.') != -1
@@ -82,10 +85,14 @@ def ParseToml(): number
                                 var value = substitute(line, '\v\s*\l*\s*\=\s*', '', "g")
                                 value = substitute(value, '"', '', "g")
 
-                                # TODO: perform a check here to ensure that both
-                                # sub_key and value match [a-z]+ before adding
-                                # to config
-                                config[key][sub_key] = value
+                                # Check to make sure the sub_key and value are
+                                # what we expect them to be. sub_key should
+                                # match ^[a-z]+$ and value should match 
+                                # ^[a-z.]+$ (This is subject to change, since
+                                # there could be other chars in a filename)
+                                if match(sub_key, '\v^[a-z]+$') != -1 && match(value, '\v^[a-z.]+$') != -1
+                                        config[key][sub_key] = value
+                                endif
                         endif
 
                 endif
