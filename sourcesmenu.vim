@@ -90,7 +90,7 @@ def ParseToml(): number
                                 # match ^[a-z]+$ and value should match 
                                 # ^[a-z.]+$ (This is subject to change, since
                                 # there could be other chars in a filename)
-                                if match(sub_key, '\v^[a-z]+$') != -1 && match(value, '\v^[a-z.]+$') != -1
+                                if match(sub_key, '\v^[a-z]+$') != -1 && match(value, '\v^[a-z.]+$|^-?[0-9]+$') != -1
                                         config[key][sub_key] = value
                                 endif
                         endif
@@ -106,11 +106,22 @@ enddef
 
 def ReadSources(): number
         var filename = ""
+
+        # Get the filename found in the config file. If this fails, abort.
         try 
                 filename = config['bibliography']['path']
         catch 
                 echo "Something went wrong getting the path"
                 return -1
+        endtry
+
+        # Try to get the offset, if it is set by the user, if not, set it to
+        # zero.
+        var offset: number
+        try
+                offset = str2nr(config['config']['offset'])
+        catch
+                offset = 0
         endtry
 
         if !filereadable(expand(filename))
@@ -121,22 +132,30 @@ def ReadSources(): number
         var source_file = readfile(expand(filename))
 
         for line in source_file
+                # In BibTeX, each entry starts with a '@', so lines with this
+                # are what we are looking for.
                 if match(line, '^@') != -1
-                        var source = substitute(line, '\v\@\l*\{|,|\s*$', '', "g")
-                        # TODO: Perform a check here to ensure that source is
-                        # what we expect it to be. 
-                        execute "menu Sources." .. source .. " :call Insertatcursor(\"" .. source .. "\")<CR>"
+
+                        # Strip the beginning @[a-z]+{ part, and just get the
+                        # label for the source
+                        var source = substitute(line, '\v\@[a-z]+\{|,|\s*$', '', "g")
+
+                        # Currently, the source label should match
+                        # ^[a-z\-]+$
+                        if match(source, '\v^[a-z\-]+$') != -1
+                                execute "menu Sources." .. source .. " :call Insertatcursor(\"" .. source .. "\"," .. offset .. ")<CR>"
+                        endif
                 endif
         endfor
 
         return 0
 enddef
 
-def g:Insertatcursor(needle: string): void
+def g:Insertatcursor(needle: string, offset: number = 0): void
         var haystack = getline('.')
         var idx = getcurpos()[2]
-        var part_one = strpart(haystack, 0, idx - 1)
-        var part_two = strpart(haystack, idx - 1)
+        var part_one = strpart(haystack, 0, idx + offset)
+        var part_two = strpart(haystack, idx + offset)
         var new_line = part_one .. needle .. part_two
         call setline('.', new_line)
 enddef
