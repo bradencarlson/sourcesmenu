@@ -1,3 +1,6 @@
 
 # ignore toml files, which are used for testing. 
 *.toml
+
+# ignore .bib files, which are used for testing. 
+*.bib

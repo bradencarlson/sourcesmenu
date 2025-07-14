@@ -13,6 +13,11 @@ g:loaded_sourcesmenu = 1
 # config file.
 var config = {}
 
+def Run(): void
+        call ParseToml()
+        call ReadSources()
+enddef
+
 
 # Function to read in a toml file and create a dictionary (of dictionaries)
 # containing all the table names and key, value pairs in each table. 
@@ -64,8 +69,32 @@ def ParseToml(): number
 
 enddef
 
+def ReadSources(): void
+        var filename = ""
+        try 
+                filename = config['bibliography']['path']
+        catch 
+                echo "Something went wrong getting the path"
+        endtry
+
+        if !filereadable(expand(filename))
+                echo "Something went wrong reading the sources file"
+                return 
+        endif
+
+        var source_file = readfile(expand(filename))
+
+        for line in source_file
+                if match(line, '^@') != -1
+                        var source = substitute(line, '\v\@\l*\{|,', '', "g")
+                        echo source
+                endif
+        endfor
+enddef
+        
+
 # Read more into this stuff in the help files. See *write-plugin*
 map <Leader>r <Plug>ReloadConfig;
 
-noremap <unique> <script> <Plug>ReloadConfig;  <SID>ParseToml
-noremap <SID>ParseToml :call <SID>ParseToml()<CR>
+noremap <unique> <script> <Plug>ReloadConfig;  <SID>Run
+noremap <SID>Run :call <SID>Run()<CR>
