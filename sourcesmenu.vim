@@ -9,17 +9,31 @@ if exists("g:loaded_sourcesmenu")
 endif
 g:loaded_sourcesmenu = 1
 
+# the dictionary which will hold all the configuration options specified in
+# config file.
 var config = {}
+
 
 # Function to read in a toml file and create a dictionary (of dictionaries)
 # containing all the table names and key, value pairs in each table. 
-def ParseToml(filename: string): number 
-        if !filereadable(expand(filename))
-                echo filename .. " not found, continuing without parsing"
-                return -1
-        endif
+def ParseToml(): number 
 
-        var config_file = readfile(expand(filename))
+        # Name of the config file. 
+        var filename = ".test.toml"
+
+        # List of places to look for the file, in order of precedence. 
+        var prefix = ["./", "~/", "~/.config/sourcesmenu/"]
+
+        var file_location = filename
+
+        for pre in prefix
+                if filereadable(expand(pre .. filename))
+                        file_location = pre .. filename
+                        break
+                endif
+        endfor
+
+        var config_file = readfile(expand(file_location))
 
         var key: string
         for line in config_file
@@ -51,7 +65,7 @@ def ParseToml(filename: string): number
 enddef
 
 # Read more into this stuff in the help files. See *write-plugin*
-map <Leader>r <Plug>ReloadConfig
+map <Leader>r <Plug>ReloadConfig;
 
-noremap <unique> <script> <Plug>ReloadConfig  <SID>ParseToml
-noremap <SID>ParseToml :call <SID>ParseToml('sources.toml')<CR>
+noremap <unique> <script> <Plug>ReloadConfig;  <SID>ParseToml
+noremap <SID>ParseToml :call <SID>ParseToml()<CR>
