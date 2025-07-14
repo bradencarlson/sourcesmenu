@@ -90,9 +90,18 @@ def ReadSources(): void
         for line in source_file
                 if match(line, '^@') != -1
                         var source = substitute(line, '\v\@\l*\{|,|\s*$', '', "g")
-                        execute "menu Sources." .. source .. " :echo \"" .. source .. "\""
+                        execute "menu Sources." .. source .. " :call Insertatcursor(\"" .. source .. "\")<CR>"
                 endif
         endfor
+enddef
+
+def g:Insertatcursor(needle: string): void
+        var haystack = getline('.')
+        var idx = getcurpos()[2]
+        var part_one = strpart(haystack, 0, idx - 1)
+        var part_two = strpart(haystack, idx - 1)
+        var new_line = part_one .. needle .. part_two
+        call setline('.', new_line)
 enddef
         
 
