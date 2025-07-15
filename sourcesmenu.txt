@@ -1,0 +1,12 @@
+*sourcesmenu.txt*                                              *sourcesmenu*
+
+Thus plugin allows BibTeX users to view the user defined labels for their
+sources in a menu in Vim. Upon selecting the desired source, the label is
+pasted into the current document. 
+
+                                                        *sourcesmenu-config*
+
+This plugin is configured by using a .toml file named `.sourcesmenu.toml`.
+There can be a local config file as well as a global config file (per user). 
+
+                                                       *sourcesmenu-options*
