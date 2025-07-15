@@ -31,7 +31,7 @@ def Run(): void
         endif
 
         set wcm=<C-Z>
-        map <F4> :emenu Sources.<C-Z>
+        map <Leader>s :emenu Sources.<C-Z>
 enddef
 
 
@@ -40,10 +40,10 @@ enddef
 def ParseToml(): number 
 
         # Name of the config file. 
-        var filename = ".test.toml"
+        var filename = "sourcesmenu.toml"
 
         # List of places to look for the file, in order of precedence. 
-        var prefix = ["./", "~/", "~/.config/sourcesmenu/"]
+        var prefix = ["./.", "~/.", "~/.config/sourcesmenu/"]
 
         var file_location = filename
 
@@ -166,3 +166,6 @@ map <Leader>r <Plug>ReloadConfig;
 
 noremap <unique> <script> <Plug>ReloadConfig;  <SID>Run
 noremap <SID>Run :call <SID>Run()<CR>
+
+# Finally, actually run the functions here. 
+call Run()
