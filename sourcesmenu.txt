@@ -1,12 +1,74 @@
-*sourcesmenu.txt*                                              *sourcesmenu*
+*sourcesmenu.txt*                                               *sourcesmenu*
 
 Thus plugin allows BibTeX users to view the user defined labels for their
 sources in a menu in Vim. Upon selecting the desired source, the label is
-pasted into the current document. 
+pasted into the current document. Use <Leader>s to open the sources menu. 
 
-                                                        *sourcesmenu-config*
+                                                         *sourcesmenu-config*
 
-This plugin is configured by using a .toml file named `.sourcesmenu.toml`.
-There can be a local config file as well as a global config file (per user). 
+Configuring this plugin is done with a TOML file and can be performed on a 
+project by project basis (i.e. if there are several directories in which 
+the user has TeX files, and each has it's own BibTeX file) or on a per user 
+basis. This plugin looks for a sourcesmenu.toml file in the following order
+1. "./.sourcesmenu.toml" (working directory where Vim was started)
+2. "~/.sourcesmenu.toml"
+3. "~/.config/sourcesmenu/sourcesmenu.toml"
+The first one of these which is found is used. 
 
-                                                       *sourcesmenu-options*
+Valid table names and their key/value pairs are as follows: 
+
+1. [bibliography] - This table is required, and the plugin will not be loaded
+if it is not found. 
+
+    1.1 path - this key is required, and is used to specify where to look
+        for the sources file to be read. If the value of this key is a file
+        which is unable to be read, the plugin will not be loaded. 
+
+2. [config] - This table is optional and is used to specify certain options
+which will be specified later. 
+
+    2.1 offset - this is an optional key which specifies where to insert the
+            reference label.  A value of 0 (the default) inserts the 
+            reference label between the character under the cursor and the 
+            character to the right. A value of -1 inserts the reference 
+            label between the cursor and the character to the left. These 
+            are the two most common values, but others are perfectly valid. 
+
+    2.2 log - This optional key allows the user to specify the location of
+            the log file that will be used when an error is encounted within
+            the plugin script. The default value for this key is 
+            "./.sourcesmenu.log"
+
+Suppose there is a directory named "project" with the following structure: 
+
+project/
+    main.tex
+    sources.bib
+    makefile
+    tex-files/
+        chapter1.tex
+        chapter2.tex
+
+To use this plugin to see the sources in "sources.bib" in a menu while
+editing "main.tex", we create the following TOML file: 
+
+        # .sourcesmenu.toml
+        [bibliography]
+        path = "sources.bib"
+
+        [config]
+        offset = -1 # insert the reference label directly under the cursor
+        log = "./.log/sourcesmenu.log" # change the location of log file
+
+Then after opening "main.tex" for editing, the command <Leader>s opens the
+sources menu. 
+
+                                                    *sourcesmenu-keymappings*
+
+The default key mappings for this plugin are as follows: 
+
+<Leader>s - Open the sources menu
+<Leader>r - Reload the config file
+
+Currently, except by editing the plugin script, these are fixed and cannot be
+chosen by the user. This will be fixed in a future version of this project. 
