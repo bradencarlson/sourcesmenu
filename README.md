@@ -1,18 +1,30 @@
 # Sources Menu
 
 This Vim plugin will allow TeX users to view their sources (listed in a .bib file)
-in a menu and paste them directly into a \cite{} command. 
+in a menu and paste them under the cursor (or to the right of the cursor, you
+decide).
 
 ## Installation
 
-**Please Note that this project is not yet in a state where it can be used as
-intended.**
-
 Install the `sourcesmenu.vim` script into the `~/.vim/plugin` directory as
-desired. 
+desired, and install the `sourcesmenu.txt` file into the `~/.vim/doc/` directory
+and run `:helptags ~/.vim/doc` to install the help page. 
 
 ## Getting Help
 
-There is currently no help page associated with this plugin. 
+After a succesful installation, you may run `:help sourcesmenu.txt` or `:help
+sourcesmenu` to read the help page for this plugin. 
 
+## Configuration
 
+Configuring this plugin is done with a TOML file and can be performed on a project 
+by project basis (i.e. if
+there are several directories in which you have TeX files, and each has it's own
+BibTeX file) or on a per user basis. This plugin looks for a sourcesmenu.toml
+file in the following order
+1. `./.sourcesmenu.toml` (working directory where Vim was started)
+2. `~/.sourcesmenu.toml`
+3. `~/.config/sourcesmenu/sourcesmenu.toml`
+The first one of these which is found is used. See the `sourcesmenu.txt` file
+for valid table names, as well as what key/value pairs are expected and
+accepted. 
