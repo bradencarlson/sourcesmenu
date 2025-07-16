@@ -2,7 +2,10 @@
 
 This Vim plugin allows TeX users to view their sources (listed in a .bib file)
 in a menu and paste them under the cursor (or to the right of the cursor, you
-decide).
+decide). See the demo video below to see the menu in action!
+
+[![Watch the
+demo.](https://img.youtube.com/vi/dZwgT1yUgkA/0.jpg)](https://youtube.com/watch?v=dZwgT1yUgkA)
 
 ## Installation
 
