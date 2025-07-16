@@ -168,7 +168,7 @@ def ReadSources(): number
 
                         # Currently, the source label should match
                         # ^[a-z\-]+$
-                        if match(source, '\v^[a-z\-]+$') != -1
+                        if match(source, '\v^[a-z0-9\-]+$') != -1
                                 execute "menu Sources." .. source .. " :call Insertatcursor(\"" .. source .. "\"," .. offset .. ")<CR>"
                         endif
                 endif

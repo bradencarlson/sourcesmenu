@@ -1,6 +1,6 @@
 # Sources Menu
 
-This Vim plugin will allow TeX users to view their sources (listed in a .bib file)
+This Vim plugin allows TeX users to view their sources (listed in a .bib file)
 in a menu and paste them under the cursor (or to the right of the cursor, you
 decide).
 
@@ -13,7 +13,9 @@ and run `:helptags ~/.vim/doc` to install the help page.
 ## Getting Help
 
 After a succesful installation, you may run `:help sourcesmenu.txt` or `:help
-sourcesmenu` to read the help page for this plugin. 
+sourcesmenu` to read the help page for this plugin. You can also run 
+`:help sourcesmenu-config` and `:help sourcesmenu-keymappings` for more specific
+information. 
 
 ## Configuration
 
