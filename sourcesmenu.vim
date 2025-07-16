@@ -13,25 +13,39 @@ g:loaded_sourcesmenu = 1
 # config file.
 var config = {}
 
+var log_file: string
+
 def Run(): void
+
+        # Use the default log file for now
+        SetLogFile()
+
         var parse_pass = ParseToml()
 
         if parse_pass == -1
-                echo "Aborting."
                 g:loaded_sourcesmenu = 0
                 return
         endif
 
+        if parse_pass == -2
+                echo "sourcesmenu plugin: Found but could not open config file."
+                g:loaded_sourcesmenu = 0
+                return 
+        endif
+
+        # Retry the log file now that the config file has been read. 
+        SetLogFile()
+
         var read_pass = ReadSources()
 
         if read_pass < 0
-                echo "Aborting."
                 g:loaded_sourcesmenu = 0
                 return
         endif
 
         set wcm=<C-Z>
         map <Leader>s :emenu Sources.<C-Z>
+
 enddef
 
 
@@ -47,32 +61,44 @@ def ParseToml(): number
 
         var file_location = filename
 
+        var found = 0
+
         for pre in prefix
                 if filereadable(expand(pre .. filename))
                         file_location = pre .. filename
+                        found = 1
                         break
                 endif
         endfor
+
+        if found == 0
+                # This error code indicates that this plugin is not currently
+                # being used. 
+                return -1
+        endif
 
         var config_file: list<string>
         try 
                 config_file = readfile(expand(file_location))
         catch 
-                echo "Can't file config file: " .. file_location
-                return -1
+                # This code indicates that something went wrong with reading the
+                # config file.
+                return -2
         endtry
 
         var key: string
         for line in config_file
                 # If the line is the beginning of a table, then add it as a key
-                # to the config dictionary. 
-                if match(line, '\s*\[\l\+\]\s*') != -1
+                # to the config dictionary.
+                if match(line, '\s*\[.\+\]\s*') != -1
                         key = substitute(line, '\s*\[\|\]\s*', "", "g")
 
                         # Make sure the key is something that we expect. key
                         # should match ^[a-z]+$
                         if match(key, '\v^[a-z]+$') != -1
                                 config[key] = {}
+                        else 
+                                Log("Invalid table name: " .. key)
                         endif
                 else 
                         # make sure the line is not empty before continuing
@@ -92,13 +118,13 @@ def ParseToml(): number
                                 # there could be other chars in a filename)
                                 if match(sub_key, '\v^[a-z]+$') != -1 && match(value, '\v^[a-z.]+$|^-?[0-9]+$') != -1
                                         config[key][sub_key] = value
+                                else 
+                                        Log("Invalid key or value: " .. sub_key .. " = " .. value)
                                 endif
                         endif
 
                 endif
         endfor
-
-        echo config
 
         return 0
 
@@ -111,7 +137,7 @@ def ReadSources(): number
         try 
                 filename = config['bibliography']['path']
         catch 
-                echo "Something went wrong getting the path"
+                Log("Something went wrong getting the path from config file.")
                 return -1
         endtry
 
@@ -125,7 +151,7 @@ def ReadSources(): number
         endtry
 
         if !filereadable(expand(filename))
-                echo "Something went wrong reading the sources file"
+                Log("Something went wrong reading the sources file.")
                 return -2
         endif
 
@@ -159,6 +185,21 @@ def g:Insertatcursor(needle: string, offset: number = 0): void
         var new_line = part_one .. needle .. part_two
         call setline('.', new_line)
 enddef
+
+def SetLogFile(): void
+        try
+                log_file = config['config']['log'] 
+        catch
+                log_file = "./.sourcesmenu.log"
+        endtry
+enddef
+
+def Log(msg: string): number
+        var current_time = strftime("%H:%m:%s", localtime())
+        call writefile([current_time .. ": " .. msg], log_file, "a")
+        return 0
+enddef
+
         
 
 # Read more into this stuff in the help files. See *write-plugin*
