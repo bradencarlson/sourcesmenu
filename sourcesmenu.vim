@@ -10,7 +10,9 @@ endif
 g:loaded_sourcesmenu = 1
 
 if has("win32") || has("win64")
-        var s:win32 = 1
+        g:win32 = 1
+else 
+        g:win32 = 0
 endif
 
 # the dictionary which will hold all the configuration options specified in
@@ -62,7 +64,7 @@ def ParseToml(): number
 
         # List of places to look for the file, in order of precedence. 
         var prefix: list<string>
-        if s:win32 == 1
+        if g:win32 == 1
                 prefix = [""]
         else
                 prefix = ["./.", "~/.", "~/.config/sourcesmenu/"]
