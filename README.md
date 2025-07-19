@@ -30,6 +30,7 @@ file in the following order
 1. `./.sourcesmenu.toml` (working directory where Vim was started)
 2. `~/.sourcesmenu.toml`
 3. `~/.config/sourcesmenu/sourcesmenu.toml`
+
 The first one of these which is found is used. See the `sourcesmenu.txt` file
 for valid table names, as well as what key/value pairs are expected and
 accepted. 

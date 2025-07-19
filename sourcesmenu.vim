@@ -9,6 +9,10 @@ if exists("g:loaded_sourcesmenu")
 endif
 g:loaded_sourcesmenu = 1
 
+if has("win32") || has("win64")
+        var s:win32 = 1
+endif
+
 # the dictionary which will hold all the configuration options specified in
 # config file.
 var config = {}
@@ -57,7 +61,12 @@ def ParseToml(): number
         var filename = "sourcesmenu.toml"
 
         # List of places to look for the file, in order of precedence. 
-        var prefix = ["./.", "~/.", "~/.config/sourcesmenu/"]
+        var prefix: list<string>
+        if s:win32 == 1
+                prefix = [""]
+        else
+                prefix = ["./.", "~/.", "~/.config/sourcesmenu/"]
+        endif
 
         var file_location = filename
 
