@@ -49,8 +49,7 @@ def Run(): void
                 return
         endif
 
-        set wcm=<C-Z>
-        map <Leader>s :emenu Sources.<C-Z>
+        SetKeyBindings()
 
 enddef
 
@@ -137,6 +136,9 @@ def ParseToml(): number
                 endif
         endfor
 
+        echo config 
+        sleep 1
+
         return 0
 
 enddef
@@ -205,19 +207,42 @@ def SetLogFile(): void
         endtry
 enddef
 
+def SetKeyBindings(): void
+
+        # Read more into this stuff in the help files. See *write-plugin*
+        map <Leader>r <Plug>ReloadConfig;
+        noremap <unique> <script> <Plug>ReloadConfig;  <SID>Run
+        noremap <SID>Run :call <SID>Run()<CR>
+
+        var has_popup: number 
+        try
+                var value = config['config']['popup']
+                if value == '0'
+                        has_popup = 0
+                else
+                        has_popup = 1
+                endif
+        catch 
+                has_popup = 0
+        endtry
+
+        if has_popup > 0
+                echo "popup!"
+                sleep 1
+                map <leader>s :popup Sources<CR>
+        else
+                echo "No popup!"
+                sleep 1
+                set wcm=<C-Z>
+                map <leader>s :emenu Sources.<C-Z>
+        endif
+enddef
+                
 def Log(msg: string): number
         var current_time = strftime("%H:%m:%s", localtime())
         call writefile([current_time .. ": " .. msg], log_file, "a")
         return 0
 enddef
-
-        
-
-# Read more into this stuff in the help files. See *write-plugin*
-map <Leader>r <Plug>ReloadConfig;
-
-noremap <unique> <script> <Plug>ReloadConfig;  <SID>Run
-noremap <SID>Run :call <SID>Run()<CR>
 
 # Finally, actually run the functions here. 
 call Run()
