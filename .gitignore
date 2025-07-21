@@ -4,3 +4,5 @@
 
 # ignore .bib files, which are used for testing. 
 *.bib
+*.tex
+*.log
