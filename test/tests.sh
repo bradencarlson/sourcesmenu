@@ -1,12 +1,23 @@
 #!/bin/bash
 
-generate_toml_file() {
+generate_good_toml_file() {
         cat > .sourcesmenu.toml <<EOF
 [bibliography]
 path = "sources.bib"
 [config]
 offset = 0
 popup = 1
+EOF
+}
+
+generate_bad_toml_file() {
+        cat > .sourcesmenu.toml <<EOF
+[bibliography]
+path = "sources.bib"
+[config]
+offset = 0
+popup = 1
+[badtable123]
 EOF
 }
 
@@ -41,20 +52,41 @@ EOF
 
 }
 
-generate_test_files() {
+generate_good_test_files() {
         generate_tex_file
         generate_bib_file
-        generate_toml_file
+        generate_good_toml_file
 }
 
-start_vim() {
-        if [[ $# < 2 ]]; then 
-                generate_test_files
-                vim --noplugin -S ../sourcesmenu.vim main.tex
-        else
-                vim --noplugin -S ../sourcesmenu.vim $1
+generate_config_test_files() {
+        generate_tex_file
+        generate_bib_file
+        generate_bad_toml_file
+}
+
+start_good_test() {
+        echo "Starting good test, everything should load and function as usual."
+        read -p "Press any key to continue"
+
+        generate_good_test_files
+        vim --noplugin -S ../sourcesmenu.vim main.tex
+}
+
+start_config_error_test() {
+        echo "Starting config error test, plugin should show an error, then vim should load as usual"
+        echo "No key bindings from the plugin should be loaded."
+        read -p "Press any key to continue"
+
+        generate_config_test_files
+        vim --noplugin -S ../sourcesmenu.vim main.tex
+}
+
+for opt in $@; do
+        if [[ "$opt" == "full" ]]; then
+                start_good_test
+                start_config_error_test
+        elif [[ "$opt" == "config" ]]; then
+                start_config_error_test
         fi
-}
-
-start_vim
+done
 

@@ -31,10 +31,12 @@ def Run(): void
         if parse_pass == -1
                 g:loaded_sourcesmenu = 0
                 return
-        endif
-
-        if parse_pass == -2
+        elseif parse_pass == -2
                 echo "sourcesmenu plugin: Found but could not open config file."
+                g:loaded_sourcesmenu = 0
+                return 
+        elseif parse_pass == -3
+                echo "sourcesmenu plugin: Error parsing config file."
                 g:loaded_sourcesmenu = 0
                 return 
         endif
@@ -45,6 +47,8 @@ def Run(): void
         var read_pass = ReadSources()
 
         if read_pass < 0
+                echo "sourcesmenu plugin: Something went wrong reading source file." 
+                                        \ .. " See " .. log_file .. " for more info."
                 g:loaded_sourcesmenu = 0
                 return
         endif
@@ -57,6 +61,9 @@ enddef
 # Function to read in a toml file and create a dictionary (of dictionaries)
 # containing all the table names and key, value pairs in each table. 
 def ParseToml(): number 
+
+        var errno: number
+        errno = 0
 
         # Name of the config file. 
         var filename = "sourcesmenu.toml"
@@ -109,6 +116,7 @@ def ParseToml(): number
                                 config[key] = {}
                         else 
                                 Log("Invalid table name: " .. key)
+                                errno = -3
                         endif
                 else 
                         # make sure the line is not empty before continuing
@@ -130,16 +138,14 @@ def ParseToml(): number
                                         config[key][sub_key] = value
                                 else 
                                         Log("Invalid key or value: " .. sub_key .. " = " .. value)
+                                        errno = -3
                                 endif
                         endif
 
                 endif
         endfor
 
-        echo config 
-        sleep 1
-
-        return 0
+        return errno
 
 enddef
 
@@ -202,6 +208,11 @@ enddef
 def SetLogFile(): void
         try
                 log_file = config['config']['log'] 
+                if filewritable(log_file)
+                        continue
+                else
+                        log_file = "./.sourcesmenu.log"
+                endif
         catch
                 log_file = "./.sourcesmenu.log"
         endtry
@@ -227,12 +238,8 @@ def SetKeyBindings(): void
         endtry
 
         if has_popup > 0
-                echo "popup!"
-                sleep 1
                 map <leader>s :popup Sources<CR>
         else
-                echo "No popup!"
-                sleep 1
                 set wcm=<C-Z>
                 map <leader>s :emenu Sources.<C-Z>
         endif
