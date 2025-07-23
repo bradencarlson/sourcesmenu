@@ -42,7 +42,9 @@ def Run(): void
         # Retry the log file now that the config file has been read. 
         SetLogFile()
 
-        var read_pass = g:bib#ReadSources(config)
+        import autoload "../lib/bib.vim"
+        var read_pass = bib.ReadSources()
+
 
         if read_pass == -1
                 Log("Something went wrong getting the path from the config file.")

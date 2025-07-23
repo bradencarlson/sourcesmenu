@@ -1,5 +1,6 @@
+vimm9script
 
-def bib#ReadSources(config: dict<any>): number
+export def bib#ReadSources(config: dict<any>): number
         var filename = ""
 
         # Get the filename found in the config file. If this fails, abort.
