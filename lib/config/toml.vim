@@ -1,6 +1,8 @@
 vim9script
 
-export def Parse(): number 
+import autoload "../log.vim" as logger
+
+export def Parse(config: dict<any>): number 
 
         # Name of the config file. 
         var filename = "sourcesmenu.toml"
@@ -52,7 +54,7 @@ export def Parse(): number
                         if match(key, '\v^[a-z]+$') != -1
                                 config[key] = {}
                         else 
-                                Log("Invalid table name: " .. key)
+                                logger.Log("Invalid table name: " .. key)
                         endif
                 else 
                         # make sure the line is not empty before continuing
@@ -73,7 +75,7 @@ export def Parse(): number
                                 if match(sub_key, '\v^[a-z]+$') != -1 && match(value, '\v^[a-z.]+$|^-?[0-9]+$') != -1
                                         config[key][sub_key] = value
                                 else 
-                                        Log("Invalid key or value: " .. sub_key .. " = " .. value)
+                                        logger.Log("Invalid key or value: " .. sub_key .. " = " .. value)
                                 endif
                         endif
 

@@ -9,6 +9,10 @@ if exists("g:loaded_sourcesmenu")
 endif
 g:loaded_sourcesmenu = 1
 
+import autoload "./lib/config/toml.vim" as toml
+import autoload "./lib/filetype/bib.vim" as bib
+import autoload "./lib/log.vim" as logger
+
 if has("win32") || has("win64")
         g:win32 = 1
 else 
@@ -26,8 +30,7 @@ def Run(): void
         # Use the default log file for now
         SetLogFile()
 
-        import autoload "../lib/config/toml.vim" as toml
-        var parse_pass = toml.Parse()
+        var parse_pass = toml.Parse(config)
 
         if parse_pass == -1
                 g:loaded_sourcesmenu = 0
@@ -43,18 +46,23 @@ def Run(): void
         # Retry the log file now that the config file has been read. 
         SetLogFile()
 
-        import autoload "../lib/filetype/bib.vim" as bib
-        var read_pass = bib.ReadSources()
+        var read_pass = bib.Read(config)
 
 
         if read_pass == -1
-                Log("Something went wrong getting the path from the config file.")
+                logger.Log("Something went wrong getting the path from the config file.")
                 echo "sourcesmenu plugin: something went wrong, please see "
                                         \ .. log_file .. " for more details."
                 g:loaded_sourcesmenu = 0
                 return
         elseif read_pass == -2
-                Log("Something went wrong reading the file specified by 'path' key.")
+                logger.Log("Something went wrong reading the file specified by 'path' key.")
+                echo "sourcesmenu plugin: something went wrong, please see "
+                                        \ .. log_file .. " for more details."
+                g:loaded_sourcesmenu = 0
+                return
+        elseif read_pass == -1000
+                logger.Log("Something went wrong reading the file specified by 'path' key.")
                 echo "sourcesmenu plugin: something went wrong, please see "
                                         \ .. log_file .. " for more details."
                 g:loaded_sourcesmenu = 0
@@ -65,6 +73,26 @@ def Run(): void
         map <Leader>s :emenu Sources.<C-Z>
 
 enddef
+
+def ReadFile(): number
+        var type: string
+        try
+                type = config['bibliography']['type']
+        catch 
+                type = "bib"
+        endtry
+
+        if type == "bib"
+                import autoload "../lib/filetype/bib.vim" as bib
+                return bib.Read(config)
+        endif
+
+        logger.Log("Invalid type in config file.")
+
+        return -1000
+enddef
+
+
 
 def g:Insertatcursor(needle: string, offset: number = 0): void
         var haystack = getline('.')
@@ -82,14 +110,6 @@ def SetLogFile(): void
                 log_file = "./.sourcesmenu.log"
         endtry
 enddef
-
-def Log(msg: string): number
-        var current_time = strftime("%H:%m:%s", localtime())
-        call writefile([current_time .. ": " .. msg], log_file, "a")
-        return 0
-enddef
-
-        
 
 # Read more into this stuff in the help files. See *write-plugin*
 map <Leader>r <Plug>ReloadConfig;
