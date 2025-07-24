@@ -9,6 +9,10 @@ if exists("g:loaded_sourcesmenu")
 endif
 g:loaded_sourcesmenu = 1
 
+import autoload "./lib/config/toml.vim" as toml
+import autoload "./lib/filetype/bib.vim" as bib
+import autoload "./lib/log.vim" as logger
+
 if has("win32") || has("win64")
         g:win32 = 1
 else 
@@ -26,7 +30,7 @@ def Run(): void
         # Use the default log file for now
         SetLogFile()
 
-        var parse_pass = ParseToml()
+        var parse_pass = toml.Parse(config)
 
         if parse_pass == -1
                 g:loaded_sourcesmenu = 0
@@ -42,9 +46,25 @@ def Run(): void
         # Retry the log file now that the config file has been read. 
         SetLogFile()
 
-        var read_pass = ReadSources()
+        var read_pass = bib.Read(config)
 
-        if read_pass < 0
+
+        if read_pass == -1
+                logger.Log("Something went wrong getting the path from the config file.")
+                echo "sourcesmenu plugin: something went wrong, please see "
+                                        \ .. log_file .. " for more details."
+                g:loaded_sourcesmenu = 0
+                return
+        elseif read_pass == -2
+                logger.Log("Something went wrong reading the file specified by 'path' key.")
+                echo "sourcesmenu plugin: something went wrong, please see "
+                                        \ .. log_file .. " for more details."
+                g:loaded_sourcesmenu = 0
+                return
+        elseif read_pass == -1000
+                logger.Log("Something went wrong reading the file specified by 'path' key.")
+                echo "sourcesmenu plugin: something went wrong, please see "
+                                        \ .. log_file .. " for more details."
                 g:loaded_sourcesmenu = 0
                 return
         endif
@@ -54,139 +74,25 @@ def Run(): void
 
 enddef
 
-
-# Function to read in a toml file and create a dictionary (of dictionaries)
-# containing all the table names and key, value pairs in each table. 
-def ParseToml(): number 
-
-        # Name of the config file. 
-        var filename = "sourcesmenu.toml"
-
-        # List of places to look for the file, in order of precedence. 
-        var prefix: list<string>
-        if g:win32 == 1
-                prefix = [""]
-        else
-                prefix = ["./.", "~/.", "~/.config/sourcesmenu/"]
-        endif
-
-        var file_location = filename
-
-        var found = 0
-
-        for pre in prefix
-                if filereadable(expand(pre .. filename))
-                        file_location = pre .. filename
-                        found = 1
-                        break
-                endif
-        endfor
-
-        if found == 0
-                # This error code indicates that this plugin is not currently
-                # being used. 
-                return -1
-        endif
-
-        var config_file: list<string>
-        try 
-                config_file = readfile(expand(file_location))
-        catch 
-                # This code indicates that something went wrong with reading the
-                # config file.
-                return -2
-        endtry
-
-        var key: string
-        for line in config_file
-                # If the line is the beginning of a table, then add it as a key
-                # to the config dictionary.
-                if match(line, '\s*\[.\+\]\s*') != -1
-                        key = substitute(line, '\s*\[\|\]\s*', "", "g")
-
-                        # Make sure the key is something that we expect. key
-                        # should match ^[a-z]+$
-                        if match(key, '\v^[a-z]+$') != -1
-                                config[key] = {}
-                        else 
-                                Log("Invalid table name: " .. key)
-                        endif
-                else 
-                        # make sure the line is not empty before continuing
-                        if match(line, '.') != -1
-
-                                # otherwise, add the key and value to a
-                                # subdictionary corresponding to the current
-                                # key. 
-                                var sub_key = substitute(line, '\v\s*\=.*', '', "g")
-                                var value = substitute(line, '\v\s*\l*\s*\=\s*', '', "g")
-                                value = substitute(value, '"', '', "g")
-
-                                # Check to make sure the sub_key and value are
-                                # what we expect them to be. sub_key should
-                                # match ^[a-z]+$ and value should match 
-                                # ^[a-z.]+$ (This is subject to change, since
-                                # there could be other chars in a filename)
-                                if match(sub_key, '\v^[a-z]+$') != -1 && match(value, '\v^[a-z.]+$|^-?[0-9]+$') != -1
-                                        config[key][sub_key] = value
-                                else 
-                                        Log("Invalid key or value: " .. sub_key .. " = " .. value)
-                                endif
-                        endif
-
-                endif
-        endfor
-
-        return 0
-
-enddef
-
-def ReadSources(): number
-        var filename = ""
-
-        # Get the filename found in the config file. If this fails, abort.
-        try 
-                filename = config['bibliography']['path']
-        catch 
-                Log("Something went wrong getting the path from config file.")
-                return -1
-        endtry
-
-        # Try to get the offset, if it is set by the user, if not, set it to
-        # zero.
-        var offset: number
+def ReadFile(): number
+        var type: string
         try
-                offset = str2nr(config['config']['offset'])
-        catch
-                offset = 0
+                type = config['bibliography']['type']
+        catch 
+                type = "bib"
         endtry
 
-        if !filereadable(expand(filename))
-                Log("Something went wrong reading the sources file.")
-                return -2
+        if type == "bib"
+                import autoload "../lib/filetype/bib.vim" as bib
+                return bib.Read(config)
         endif
 
-        var source_file = readfile(expand(filename))
+        logger.Log("Invalid type in config file.")
 
-        for line in source_file
-                # In BibTeX, each entry starts with a '@', so lines with this
-                # are what we are looking for.
-                if match(line, '^@') != -1
-
-                        # Strip the beginning @[a-z]+{ part, and just get the
-                        # label for the source
-                        var source = substitute(line, '\v\@[a-z]+\{|,|\s*$', '', "g")
-
-                        # Currently, the source label should match
-                        # ^[a-z\-]+$
-                        if match(source, '\v^[a-z0-9\-]+$') != -1
-                                execute "menu Sources." .. source .. " :call Insertatcursor(\"" .. source .. "\"," .. offset .. ")<CR>"
-                        endif
-                endif
-        endfor
-
-        return 0
+        return -1000
 enddef
+
+
 
 def g:Insertatcursor(needle: string, offset: number = 0): void
         var haystack = getline('.')
@@ -204,14 +110,6 @@ def SetLogFile(): void
                 log_file = "./.sourcesmenu.log"
         endtry
 enddef
-
-def Log(msg: string): number
-        var current_time = strftime("%H:%m:%s", localtime())
-        call writefile([current_time .. ": " .. msg], log_file, "a")
-        return 0
-enddef
-
-        
 
 # Read more into this stuff in the help files. See *write-plugin*
 map <Leader>r <Plug>ReloadConfig;

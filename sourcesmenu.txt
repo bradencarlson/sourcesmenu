@@ -20,9 +20,14 @@ Valid table names and their key/value pairs are as follows:
 1. [bibliography] - This table is required, and the plugin will not be loaded
 if it is not found. 
 
-    1.1 path - this key is required, and is used to specify where to look
-        for the sources file to be read. If the value of this key is a file
-        which is unable to be read, the plugin will not be loaded. 
+    1.1 path - this key is required, and is used to specify where to look for 
+            the sources file to be read. If the value of this key is a file 
+            which is unable to be read, the plugin will not be loaded. 
+
+    1.2 type - this optional key is used to specify what type of file is 
+            specified in the 'path'. This will be used to determine how the
+            file is searched for desired menu entries. The default value is
+            'bib'. 
 
 2. [config] - This table is optional and is used to specify certain options
 which will be specified later. 

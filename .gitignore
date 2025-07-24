@@ -7,4 +7,5 @@
 *.tex
 *.log
 
+# ignore vim session files 
 edit.vim
