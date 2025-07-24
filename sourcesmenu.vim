@@ -50,19 +50,19 @@ def Run(): void
 
 
         if read_pass == -1
-                logger.Log("Something went wrong getting the path from the config file.")
+                logger.Log("Something went wrong getting the path from the config file.", log_file)
                 echo "sourcesmenu plugin: something went wrong, please see "
                                         \ .. log_file .. " for more details."
                 g:loaded_sourcesmenu = 0
                 return
         elseif read_pass == -2
-                logger.Log("Something went wrong reading the file specified by 'path' key.")
+                logger.Log("Something went wrong reading the file specified by 'path' key.",log_file)
                 echo "sourcesmenu plugin: something went wrong, please see "
                                         \ .. log_file .. " for more details."
                 g:loaded_sourcesmenu = 0
                 return
         elseif read_pass == -1000
-                logger.Log("Something went wrong reading the file specified by 'path' key.")
+                logger.Log("Something went wrong reading the file specified by 'path' key.",log_file)
                 echo "sourcesmenu plugin: something went wrong, please see "
                                         \ .. log_file .. " for more details."
                 g:loaded_sourcesmenu = 0
@@ -87,7 +87,7 @@ def ReadFile(): number
                 return bib.Read(config)
         endif
 
-        logger.Log("Invalid type in config file.")
+        logger.Log("Invalid type in config file.",log_file)
 
         return -1000
 enddef
