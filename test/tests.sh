@@ -87,6 +87,8 @@ for opt in $@; do
                 start_config_error_test
         elif [[ "$opt" == "config" ]]; then
                 start_config_error_test
+        elif [[ "$opt" == "good" ]]; then 
+                start_good_test
         fi
 done
 

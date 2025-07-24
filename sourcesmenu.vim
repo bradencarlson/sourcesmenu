@@ -208,9 +208,7 @@ enddef
 def SetLogFile(): void
         try
                 log_file = config['config']['log'] 
-                if filewritable(log_file)
-                        continue
-                else
+                if !filewritable(log_file)
                         log_file = "./.sourcesmenu.log"
                 endif
         catch
