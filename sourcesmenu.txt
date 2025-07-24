@@ -44,6 +44,10 @@ which will be specified later.
             the plugin script. The default value for this key is 
             "./.sourcesmenu.log"
 
+    2.3 popup - This optional key specifies whether or not a popup menu
+            (value of 1, or any positive integer) is used or a wildmenu
+            (value of 0) is used. The default is the wildmenu. 
+
 Suppose there is a directory named "project" with the following structure: 
 
 project/
@@ -64,6 +68,7 @@ editing "main.tex", we create the following TOML file:
         [config]
         offset = -1 # insert the reference label directly under the cursor
         log = "./.log/sourcesmenu.log" # change the location of log file
+        popup = 1 # use popup menus
 
 Then after opening "main.tex" for editing, the command <Leader>s opens the
 sources menu. 

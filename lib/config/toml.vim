@@ -4,6 +4,8 @@ import autoload "../log.vim" as logger
 
 export def Parse(config: dict<any>): number 
 
+        var errno = 0
+
         # Name of the config file. 
         var filename = "sourcesmenu.toml"
 
@@ -55,6 +57,7 @@ export def Parse(config: dict<any>): number
                                 config[key] = {}
                         else 
                                 logger.Log("Invalid table name: " .. key)
+                                errno = -1000
                         endif
                 else 
                         # make sure the line is not empty before continuing
@@ -76,12 +79,13 @@ export def Parse(config: dict<any>): number
                                         config[key][sub_key] = value
                                 else 
                                         logger.Log("Invalid key or value: " .. sub_key .. " = " .. value)
+                                        errno = -1000
                                 endif
                         endif
 
                 endif
         endfor
 
-        return 0
+        return errno
 
 enddef
