@@ -9,9 +9,15 @@ demo.](https://img.youtube.com/vi/dZwgT1yUgkA/0.jpg)](https://youtube.com/watch?
 
 ## Installation
 
-Install the `sourcesmenu.vim` script into the `~/.vim/plugin` directory as
-desired, and install the `sourcesmenu.txt` file into the `~/.vim/doc/` directory
-and run `:helptags ~/.vim/doc` to install the help page. 
+Currently, the easiest way to install this project is to run the following
+commands: 
+```
+cd .vim/plugin/
+git clone https://github.com/bradencarlson/sourcesmenu.git
+mv ~/.vim/plugin/sourcesmenu/sourcesmenu.txt ~/.vim/doc/
+```
+Once the above has been run, don't forget to start vim and run 
+`:helptags ~/.vim/doc` to install the help page for this plugin. 
 
 ## Getting Help
 
