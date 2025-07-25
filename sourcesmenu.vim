@@ -119,7 +119,10 @@ enddef
 def SetKeyBindings(): void
 
         # Read more into this stuff in the help files. See *write-plugin*
-        map <Leader>r <Plug>ReloadConfig;
+        if !hasmapto("<Plug>ReloadConfig;")
+                map <Leader>r <Plug>ReloadConfig;
+        endif
+
         noremap <unique> <script> <Plug>ReloadConfig;  <SID>Run
         noremap <SID>Run :call <SID>Run()<CR>
 
@@ -136,10 +139,15 @@ def SetKeyBindings(): void
         endtry
 
         if has_popup > 0
-                map <leader>s :popup Sources<CR>
+                if !hasmapto(":popup Sources<CR>")
+                        map <leader>s :popup Sources<CR>
+                endif
         else
                 set wcm=<C-Z>
-                map <leader>s :emenu Sources.<C-Z>
+
+                if !hasmapto(":emenu Sources")
+                        map <leader>s :emenu Sources.<C-Z>
+                endif
         endif
 enddef
                 

@@ -52,14 +52,24 @@ EOF
 
 }
 
+generate_vimrc_file() {
+        cat > vimrc <<EOF
+source \$VIMRUNTIME/defaults.vim
+let mapleader=","
+map <leader>c :popup Sources<CR>
+EOF
+}
+
 generate_good_test_files() {
         generate_tex_file
+        generate_vimrc_file
         generate_bib_file
         generate_good_toml_file
 }
 
 generate_config_test_files() {
         generate_tex_file
+        generate_vimrc_file
         generate_bib_file
         generate_bad_toml_file
 }
@@ -69,7 +79,7 @@ start_good_test() {
         read -p "Press any key to continue"
 
         generate_good_test_files
-        vim --noplugin -S ../sourcesmenu.vim main.tex
+        vim --noplugin -u ./vimrc -S ../sourcesmenu.vim main.tex
 }
 
 start_config_error_test() {
@@ -78,7 +88,7 @@ start_config_error_test() {
         read -p "Press any key to continue"
 
         generate_config_test_files
-        vim --noplugin -S ../sourcesmenu.vim main.tex
+        vim --noplugin -u ./vimrc -S ../sourcesmenu.vim main.tex
 }
 
 for opt in $@; do

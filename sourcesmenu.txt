@@ -64,6 +64,7 @@ editing "main.tex", we create the following TOML file:
         # .sourcesmenu.toml
         [bibliography]
         path = "sources.bib"
+        type = "bib"
 
         [config]
         offset = -1 # insert the reference label directly under the cursor
@@ -80,5 +81,14 @@ The default key mappings for this plugin are as follows:
 <Leader>s - Open the sources menu
 <Leader>r - Reload the config file
 
-Currently, except by editing the plugin script, these are fixed and cannot be
-chosen by the user. This will be fixed in a future version of this project. 
+These can be remapped by the user. To change the key mapping for opening the
+sources menu, create a mapping whose right hand side is ":popup Sources<CR>"
+(if you are using popup menus), or ":emenu Sources<CR>" (if you are using the
+wildmenu). 
+
+Similarly, to change the mappging which reloads the config file, create a
+mapping whose right hand side is "<Plug>ReloadConfig;". 
+
+Note: If the user wishes to remap these, they must do so in a way such that
+their mappings are defined before the plugin is loaded, for example, in their
+vimrc file. 

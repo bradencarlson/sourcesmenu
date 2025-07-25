@@ -6,6 +6,7 @@
 *.bib
 *.tex
 *.log
+test/vimrc
 
 # ignore vim session files 
 edit.vim
