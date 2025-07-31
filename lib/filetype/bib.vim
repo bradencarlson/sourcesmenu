@@ -1,24 +1,6 @@
 vim9script
 
-export def Read(config: dict<any>): number
-        var filename = ""
-
-        # Get the filename found in the config file. If this fails, abort.
-        try 
-                filename = config['bibliography']['path']
-        catch 
-                # Something went wrong getting the path from config file.
-                return -1
-        endtry
-
-        # Try to get the offset, if it is set by the user, if not, set it to
-        # zero.
-        var offset: number
-        try
-                offset = str2nr(config['config']['offset'])
-        catch
-                offset = 0
-        endtry
+export def Read(filename: string, offset: number): number
 
         if !filereadable(expand(filename))
                 # Something went wrong reading the sources file

@@ -22,8 +22,11 @@ endif
 # the dictionary which will hold all the configuration options specified in
 # config file.
 var config = {}
-
-var log_file: string
+var path: string
+var type: string
+var offset: number
+var pop_up: number
+var log: string
 
 def Run(): void
 
@@ -48,25 +51,27 @@ def Run(): void
         # Retry the log file now that the config file has been read. 
         SetLogFile()
 
-        var read_pass = bib.Read(config)
+        ReadOptions(config)
+
+        var read_pass = ReadFile()
 
 
         if read_pass == -1
-                logger.Log("Something went wrong getting the path from the config file.", log_file)
+                logger.Log("Something went wrong getting the path from the config file.", log)
                 echo "sourcesmenu plugin: something went wrong, please see "
-                                        \ .. log_file .. " for more details."
+                                        \ .. log .. " for more details."
                 g:loaded_sourcesmenu = 0
                 return
         elseif read_pass == -2
-                logger.Log("Something went wrong reading the file specified by 'path' key.", log_file)
+                logger.Log("Something went wrong reading the file specified by 'path' key.", log)
                 echo "sourcesmenu plugin: something went wrong, please see "
-                                        \ .. log_file .. " for more details."
+                                        \ .. log .. " for more details."
                 g:loaded_sourcesmenu = 0
                 return
         elseif read_pass == -1000
-                logger.Log("Something went wrong reading the file specified by 'path' key.", log_file)
+                logger.Log("Something went wrong reading the file specified by 'path' key.", log)
                 echo "sourcesmenu plugin: something went wrong, please see "
-                                        \ .. log_file .. " for more details."
+                                        \ .. log .. " for more details."
                 g:loaded_sourcesmenu = 0
                 return
         endif
@@ -75,44 +80,67 @@ def Run(): void
 
 enddef
 
-def ReadFile(): number
-        var type: string
-        try
-                type = config['bibliography']['type']
+def ReadOptions(config_dict: dict<any>): number
+        try 
+                path = config_dict['bibliography']['path']
+        catch 
+                path = "./sources.bib"
+        endtry
+
+        try 
+                type = config_dict['bibliography']['type']
         catch 
                 type = "bib"
         endtry
 
+        try 
+                offset = config_dict['bibliography']['offset']
+        catch 
+                offset = 0
+        endtry
+
+        try 
+                log = config_dict['bibliography']['log']
+        catch 
+                log = "./sourcesmenu.log"
+        endtry
+
+        try 
+                pop_up = config_dict['bibliography']['popup']
+        catch 
+                pop_up = 0
+        endtry
+
+        return 0
+            
+enddef
+
+def ReadFile(): number
+
         if type == "bib"
-                import autoload "../lib/filetype/bib.vim" as bib
-                return bib.Read(config)
+                return bib.Read(path, offset)
         endif
 
-        logger.Log("Invalid type in config file.", log_file)
+        logger.Log("Invalid type in config file.", log)
 
         return -1000
 enddef
 
 
 
-def g:Insertatcursor(needle: string, offset: number = 0): void
+def g:Insertatcursor(needle: string, pos: number = 0): void
         var haystack = getline('.')
         var idx = getcurpos()[2]
-        var part_one = strpart(haystack, 0, idx + offset)
-        var part_two = strpart(haystack, idx + offset)
+        var part_one = strpart(haystack, 0, idx + pos)
+        var part_two = strpart(haystack, idx + pos)
         var new_line = part_one .. needle .. part_two
         call setline('.', new_line)
 enddef
 
 def SetLogFile(): void
-        try
-                log_file = config['config']['log'] 
-                if !filewritable(log_file)
-                        log_file = "./.sourcesmenu.log"
-                endif
-        catch
-                log_file = "./.sourcesmenu.log"
-        endtry
+        if !filewritable(log)
+                log = "./.sourcesmenu.log"
+        endif
 enddef
 
 
@@ -126,19 +154,7 @@ def SetKeyBindings(): void
         noremap <unique> <script> <Plug>ReloadConfig;  <SID>Run
         noremap <SID>Run :call <SID>Run()<CR>
 
-        var has_popup: number 
-        try
-                var value = config['config']['popup']
-                if value == '0'
-                        has_popup = 0
-                else
-                        has_popup = 1
-                endif
-        catch 
-                has_popup = 0
-        endtry
-
-        if has_popup > 0
+        if pop_up > 0
                 if !hasmapto(":popup Sources<CR>")
                         map <leader>s :popup Sources<CR>
                 endif
@@ -153,7 +169,7 @@ enddef
                 
 def Log(msg: string): number
         var current_time = strftime("%H:%m:%s", localtime())
-        call writefile([current_time .. ": " .. msg], log_file, "a")
+        call writefile([current_time .. ": " .. msg], log, "a")
         return 0
 enddef
 

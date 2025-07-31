@@ -42,7 +42,7 @@ which will be specified later.
     2.2 log - This optional key allows the user to specify the location of
             the log file that will be used when an error is encounted within
             the plugin script. The default value for this key is 
-            "./.sourcesmenu.log"
+            "./sourcesmenu.log"
 
     2.3 popup - This optional key specifies whether or not a popup menu
             (value of 1, or any positive integer) is used or a wildmenu
