@@ -10,13 +10,13 @@ export def Parse(config: dict<any>): list<any>
         var file_location = find.FindConfig(".sourcesmenu.toml")
 
         var config_location = file_location
-        file_location = config_location .. ".sourcesmenu.toml"
 
         if file_location == "NONE"
                 # Plugin not used currently
                 return [-1]
         endif
 
+        file_location = config_location .. ".sourcesmenu.toml"
 
         var config_file: list<string>
         try 

@@ -117,15 +117,6 @@ def ReadOptions(config_dict: dict<any>): number
                 pop_up = 0
         endtry
 
-
-        echo config_dict
-        echo "path: " .. path
-        echo "type: " .. type
-        echo "offset: " .. offset
-        echo "log: " .. log
-        echo "popup: " .. pop_up
-        sleep 3
-            
         return 0
 
 enddef

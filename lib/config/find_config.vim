@@ -1,6 +1,6 @@
 vim9script
 
-def FindConfig(filename: string): string
+export def FindConfig(filename: string): string
         if g:win32 == 1
                 var prefix = ["./"]
                 for pre in prefix
