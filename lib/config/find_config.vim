@@ -14,6 +14,7 @@ export def FindConfig(filename: string): string
                 # Search up the directory tree to see if we are in a
                 # subdirectory of a project using this plugin.
                 var path = getcwd()
+                path = path .. "/"
                 while path != ""
                         if filereadable(path .. filename)
                                 return path

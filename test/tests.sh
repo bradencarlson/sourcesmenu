@@ -6,7 +6,7 @@ generate_good_toml_file() {
 path = "sources.bib"
 [config]
 offset = 0
-popup = 0
+popup = 1
 EOF
 }
 
