@@ -1,4 +1,9 @@
 # Sources Menu
+<span style="nowrap">
+  <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/bradencarlson/sourcesmenu">
+  <img alt="GitHub License" src="https://img.shields.io/github/license/bradencarlson/sourcesmenu">
+  <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/bradencarlson/sourcesmenu">
+</span>
 
 This Vim plugin allows TeX users to view their sources (listed in a .bib file)
 in a menu and paste them under the cursor (or to the right of the cursor, you
