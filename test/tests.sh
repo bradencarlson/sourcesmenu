@@ -6,7 +6,7 @@ generate_good_toml_file() {
 path = "sources.bib"
 [config]
 offset = 0
-popup = 1
+popup = 0
 EOF
 }
 
@@ -56,8 +56,8 @@ generate_vimrc_file() {
         cat > vimrc <<EOF
 source \$VIMRUNTIME/defaults.vim
 let mapleader=","
-map <leader>c :popup Sources<CR>
 EOF
+# map <leader>c :popup Sources<CR>
 }
 
 generate_good_test_files() {

@@ -1,39 +1,22 @@
 vim9script
 
 import autoload "../log.vim" as logger
+import autoload "./find_config.vim" as find
 
-export def Parse(config: dict<any>): number 
+export def Parse(config: dict<any>): list<any>
 
         var errno = 0
 
-        # Name of the config file. 
-        var filename = "sourcesmenu.toml"
+        var file_location = find.FindConfig(".sourcesmenu.toml")
 
-        # List of places to look for the file, in order of precedence. 
-        var prefix: list<string>
-        if g:win32 == 1
-                prefix = [""]
-        else
-                prefix = ["./.", "~/.", "~/.config/sourcesmenu/"]
+        var config_location = file_location
+        file_location = config_location .. ".sourcesmenu.toml"
+
+        if file_location == "NONE"
+                # Plugin not used currently
+                return [-1]
         endif
 
-        var file_location = filename
-
-        var found = 0
-
-        for pre in prefix
-                if filereadable(expand(pre .. filename))
-                        file_location = pre .. filename
-                        found = 1
-                        break
-                endif
-        endfor
-
-        if found == 0
-                # This error code indicates that this plugin is not currently
-                # being used. 
-                return -1
-        endif
 
         var config_file: list<string>
         try 
@@ -41,7 +24,7 @@ export def Parse(config: dict<any>): number
         catch 
                 # This code indicates that something went wrong with reading the
                 # config file.
-                return -2
+                return [-2]
         endtry
 
         var key: string
@@ -86,6 +69,6 @@ export def Parse(config: dict<any>): number
                 endif
         endfor
 
-        return errno
+        return [errno, config_location]
 
 enddef

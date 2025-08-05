@@ -22,6 +22,7 @@ endif
 # the dictionary which will hold all the configuration options specified in
 # config file.
 var config = {}
+var config_location: string
 var path: string
 var type: string
 var offset: number
@@ -35,24 +36,28 @@ def Run(): void
 
         var parse_pass = toml.Parse(config)
 
-        if parse_pass == -1
+        if parse_pass[0] == -1
                 g:loaded_sourcesmenu = 0
                 return
-        elseif parse_pass == -2
+        elseif parse_pass[0] == -2
                 echo "sourcesmenu plugin: Found but could not open config file."
                 g:loaded_sourcesmenu = 0
                 return 
-        elseif parse_pass == -1000
+        elseif parse_pass[0] == -1000
                 echo "sourcesmenu plugin: Error parsing config file."
                 g:loaded_sourcesmenu = 0
                 return 
         endif
 
+        config_location = parse_pass[1]
+
         # Retry the log file now that the config file has been read. 
         SetLogFile()
 
+        # Parse the options found in the config file
         ReadOptions(config)
 
+        # Read the sources file found in the config file.
         var read_pass = ReadFile()
 
 
@@ -76,15 +81,16 @@ def Run(): void
                 return
         endif
 
+        # Set keybindings, if user has not already done so. 
         SetKeyBindings()
 
 enddef
 
 def ReadOptions(config_dict: dict<any>): number
         try 
-                path = config_dict['bibliography']['path']
+                path = config_location .. config_dict['bibliography']['path']
         catch 
-                path = "./sources.bib"
+                path = config_location .. ".sources.bib"
         endtry
 
         try 
@@ -94,25 +100,34 @@ def ReadOptions(config_dict: dict<any>): number
         endtry
 
         try 
-                offset = config_dict['bibliography']['offset']
+                offset = str2nr(config_dict['config']['offset'])
         catch 
                 offset = 0
         endtry
 
         try 
-                log = config_dict['bibliography']['log']
+                log = config_location .. config_dict['config']['log']
         catch 
-                log = "./sourcesmenu.log"
+                log = config_location .. ".sourcesmenu.log"
         endtry
 
         try 
-                pop_up = config_dict['bibliography']['popup']
+                pop_up = str2nr(config_dict['config']['popup'])
         catch 
                 pop_up = 0
         endtry
 
-        return 0
+
+        echo config_dict
+        echo "path: " .. path
+        echo "type: " .. type
+        echo "offset: " .. offset
+        echo "log: " .. log
+        echo "popup: " .. pop_up
+        sleep 3
             
+        return 0
+
 enddef
 
 def ReadFile(): number
