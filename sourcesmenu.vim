@@ -30,6 +30,9 @@ var pop_up: number
 var log: string
 
 def Run(): void
+        # Reads the configuration file, the sources file, and creates all the
+        # menus which will be used. Finally, if no errors are caught, it sets
+        # the keymappings. 
 
         # Use the default log file for now
         SetLogFile()
@@ -37,6 +40,7 @@ def Run(): void
         var parse_pass = toml.Parse(config)
 
         if parse_pass[0] == -1
+                # Plugin not used for current project, quit now.
                 g:loaded_sourcesmenu = 0
                 return
         elseif parse_pass[0] == -2
@@ -49,16 +53,23 @@ def Run(): void
                 return 
         endif
 
-        config_location = parse_pass[1]
+        try
+                config_location = parse_pass[1]
+        catch 
+                echo "sourcesmenu plugin: Error parsing config file."
+                g:loaded_sourcesmenu = 0
+                return
+        endtry
 
-        # Retry the log file now that the config file has been read. 
+        # Now that the config file has been read, use the specified log file,
+        # if any.
         SetLogFile()
 
         # Parse the options found in the config file
         ReadOptions(config)
 
-        # Read the sources file found in the config file.
-        var read_pass = ReadFile()
+        # Read the specified source file. 
+        var read_pass = ReadFile(path, offset)
 
 
         if read_pass == -1
@@ -87,6 +98,19 @@ def Run(): void
 enddef
 
 def ReadOptions(config_dict: dict<any>): number
+        # Parse all options specified in a dictionary obtained by reading a
+        # config file. 
+        #
+        # Parameters: 
+        #  config_dict - A dictionary obtained from reading a config file. 
+        #
+        # Returns:
+        #  0: always returns zero. 
+        #
+        # Note: This function should be called after the config file has been
+        # succesfully loaded, since it relies on the value of the variable
+        # config_location
+        
         try 
                 path = config_location .. config_dict['bibliography']['path']
         catch 
@@ -121,10 +145,28 @@ def ReadOptions(config_dict: dict<any>): number
 
 enddef
 
-def ReadFile(): number
+def ReadFile(file: string, off: number): number
+        # Read the file specified in the config file, searching for entries
+        # of interest, and adding them to a menu for access.  This function
+        # only calls the appropriate method based on what type of sources
+        # file was specified in the config file. 
+        #
+        # Parameters: 
+        #   file: the file to read
+        #   off: the offset to use when inserting a string into the current
+        #   line. 
+        #
+        # Returns: 
+        #  -1000: In the event an invalid type is specified in the config
+        #         file
+        #  number: the value returned from the appropriate called function.
+        #
+        # Note: The offset value (from the parameter off) is used here
+        # becuase currently the Read function from the bib script creates the
+        # menu, this will be changed in the future. 
 
         if type == "bib"
-                return bib.Read(path, offset)
+                return bib.Read(file, off)
         endif
 
         logger.Log("Invalid type in config file.", log)
@@ -132,27 +174,43 @@ def ReadFile(): number
         return -1000
 enddef
 
-
-
-def g:Insertatcursor(needle: string, pos: number = 0): void
+def g:Insertatcursor(needle: string, off: number = 0): void
+        # Inserts a string into the current cursor offition offset by the
+        # value of the parameter off. The current line is first split at the
+        # currnt position of the cursor plus the offset, then needle is added
+        # to the first portion of the line, which is then stiched back
+        # together. 
+        #
+        # Parameters: 
+        #  needle: the string to insert into the current line (haystack)
+        #  off: the offset to use when splitting the line. 
+        #
+        # Returns: 
+        #  none
+        
         var haystack = getline('.')
         var idx = getcurpos()[2]
-        var part_one = strpart(haystack, 0, idx + pos)
-        var part_two = strpart(haystack, idx + pos)
+        var part_one = strpart(haystack, 0, idx + off)
+        var part_two = strpart(haystack, idx + off)
         var new_line = part_one .. needle .. part_two
         call setline('.', new_line)
 enddef
 
 def SetLogFile(): void
+        # Set the log while which will be used. If the config file has not
+        # been read yet, the default is ".sourcesmenu.log" in the current
+        # directory. 
+        
         if !filewritable(log)
                 log = "./.sourcesmenu.log"
         endif
 enddef
 
-
 def SetKeyBindings(): void
+        # Set the keybindings used to access the menu. First checks to see if
+        # the user has specified what keybindings to use, if no keybindings
+        # are specified, the default "<Leader>s" is used. 
 
-        # Read more into this stuff in the help files. See *write-plugin*
         if !hasmapto("<Plug>ReloadConfig;")
                 map <Leader>r <Plug>ReloadConfig;
         endif
@@ -173,11 +231,5 @@ def SetKeyBindings(): void
         endif
 enddef
                 
-def Log(msg: string): number
-        var current_time = strftime("%H:%m:%s", localtime())
-        call writefile([current_time .. ": " .. msg], log, "a")
-        return 0
-enddef
-
 # Finally, actually run the functions here. 
 call Run()

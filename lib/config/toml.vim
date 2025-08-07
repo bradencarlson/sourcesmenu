@@ -1,19 +1,51 @@
 vim9script
 
+# toml.vim
+# Author: Braden Carlson
+#
+# For the parsing of TOML files. Currently this only supports a very small
+# subset of the TOML language, namely tables and key/value pairs in those
+# tables. 
+
 import autoload "../log.vim" as logger
 import autoload "./find_config.vim" as find
 
 export def Parse(config: dict<any>): list<any>
+        # Parse the toml file.  Currently this only supports a very small
+        # portion of the toml language, namely table names, and key/value pairs. 
+        # For this project so far, this seems like it will be enough. 
+        #
+        # All table names and keys in the toml file should match [a-z]+.
+        # All values in the toml file should match [a-z.]+|-?[0-9]+, that is
+        # keys should either be a string consisting of chars a-z or a ., or a
+        # number (positive or negative). Any table names, keys, or values which
+        # do not match these will result in errno to be set to -1000. 
+        #
+        # Parameters: 
+        #   config: the dictionary into which all options will be stored.
+        #
+        # Returns: 
+        #   the list [errno, config_location], where
+        #
+        #   errno: 
+        #          0: no error occured
+        #         -1: no config file found
+        #         -2: config file found, but unable to be read
+        #      -1000: invalid table name, key name, or value in config file
+        #   config_location: the location of the configuration file, if found. 
 
         var errno = 0
 
+        # Try to find a toml config file.
+        # The FindConfig method checks all the default locations for the
+        # specified filename.
         var file_location = find.FindConfig(".sourcesmenu.toml")
 
         var config_location = file_location
 
         if file_location == "NONE"
                 # Plugin not used currently
-                return [-1]
+                return [-1, "NONE"]
         endif
 
         file_location = config_location .. ".sourcesmenu.toml"
@@ -24,7 +56,7 @@ export def Parse(config: dict<any>): list<any>
         catch 
                 # This code indicates that something went wrong with reading the
                 # config file.
-                return [-2]
+                return [-2, "NONE"]
         endtry
 
         var key: string

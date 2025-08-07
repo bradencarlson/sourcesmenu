@@ -10,7 +10,8 @@ Configuring this plugin is done with a TOML file and can be performed on a
 project by project basis (i.e. if there are several directories in which 
 the user has TeX files, and each has it's own BibTeX file) or on a per user 
 basis. This plugin looks for a sourcesmenu.toml file in the following order
-1. "./.sourcesmenu.toml" (working directory where Vim was started)
+1. "/**/.sourcesmenu.toml" (working directory where Vim was started, or any
+   direct parent of this directory)
 2. "~/.sourcesmenu.toml"
 3. "~/.config/sourcesmenu/sourcesmenu.toml"
 The first one of these which is found is used. 
@@ -20,19 +21,21 @@ Valid table names and their key/value pairs are as follows:
 1. [bibliography] - This table is required, and the plugin will not be loaded
 if it is not found. 
 
-    1.1 path - this key is required, and is used to specify where to look for 
+    1.1 path - This key is required, and is used to specify where to look for 
             the sources file to be read. If the value of this key is a file 
-            which is unable to be read, the plugin will not be loaded. 
+            which is unable to be read, the plugin will not be loaded. This
+            should be a path relative to the configuration file. See the
+            example below. 
 
-    1.2 type - this optional key is used to specify what type of file is 
+    1.2 type - This optional key is used to specify what type of file is 
             specified in the 'path'. This will be used to determine how the
             file is searched for desired menu entries. The default value is
             'bib'. 
 
 2. [config] - This table is optional and is used to specify certain options
-which will be specified later. 
+to tune the performace of this plugin. 
 
-    2.1 offset - this is an optional key which specifies where to insert the
+    2.1 offset - This is an optional key which specifies where to insert the
             reference label.  A value of 0 (the default) inserts the 
             reference label between the character under the cursor and the 
             character to the right. A value of -1 inserts the reference 
@@ -48,7 +51,8 @@ which will be specified later.
             (value of 1, or any positive integer) is used or a wildmenu
             (value of 0) is used. The default is the wildmenu. 
 
-Suppose there is a directory named "project" with the following structure: 
+We now go over a small example. Suppose there is a directory named "project"
+with the following structure: 
 
 project/
     main.tex
@@ -59,7 +63,7 @@ project/
         chapter2.tex
 
 To use this plugin to see the sources in "sources.bib" in a menu while
-editing "main.tex", we create the following TOML file: 
+editing any of the TeX files, we create the following TOML file: 
 
         # .sourcesmenu.toml
         [bibliography]
@@ -71,15 +75,15 @@ editing "main.tex", we create the following TOML file:
         log = "./.log/sourcesmenu.log" # change the location of log file
         popup = 1 # use popup menus
 
-Then after opening "main.tex" for editing, the command <Leader>s opens the
-sources menu. 
+Then after opening any one of the TeX files for editing, the command 
+<Leader>s opens the sources menu. 
 
                                                     *sourcesmenu-keymappings*
 
 The default key mappings for this plugin are as follows: 
 
 <Leader>s - Open the sources menu
-<Leader>r - Reload the config file
+<Leader>r - Reload the plugin
 
 These can be remapped by the user. To change the key mapping for opening the
 sources menu, create a mapping whose right hand side is ":popup Sources<CR>"
