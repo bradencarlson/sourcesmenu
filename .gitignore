@@ -10,3 +10,5 @@ test/vimrc
 
 # ignore vim session files 
 edit.vim
+
+media/*
