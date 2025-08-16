@@ -10,7 +10,7 @@ in a menu and paste them under the cursor (or to the right of the cursor, you
 decide). See the demo video below to see the menu in action!
 
 [![Watch the
-demo.](https://img.youtube.com/vi/dZwgT1yUgkA/0.jpg)](https://youtube.com/watch?v=dZwgT1yUgkA)
+demo.](https://img.youtube.com/vi/ieA-VIerV/0.jpg)](https://youtu.be/ieA-VIeRV_U)
 
 ## Installation
 
